@@ -1,0 +1,80 @@
+<!-- src/frontend/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Digit Recognition</title>
+</head>
+<body>
+  <h2>Draw a digit (0-9)</h2>
+  <canvas id="canvas" width="280" height="280" style="border:1px solid black;"></canvas>
+  <br>
+  <button id="predictBtn">Predict</button>
+  <button id="clearBtn">Clear</button>
+  <h3 id="result"></h3>
+
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.lineWidth = 15;
+    ctx.lineCap = "round";
+
+    let drawing = false;
+
+    canvas.addEventListener("mousedown", () => drawing = true);
+    canvas.addEventListener("mouseup", () => drawing = false);
+    canvas.addEventListener("mouseleave", () => drawing = false);
+
+    canvas.addEventListener("mousemove", (e) => {
+      if (!drawing) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      ctx.lineTo(x, y);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+    });
+
+    canvas.addEventListener("mousedown", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      ctx.beginPath();
+      ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+    });
+
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      ctx.fillStyle = "white";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      document.getElementById("result").innerText = "";
+    });
+
+    document.getElementById("predictBtn").addEventListener("click", async () => {
+      // downsample 280x280 canvas -> 28x28 using an offscreen canvas
+      const small = document.createElement("canvas");
+      small.width = 28;
+      small.height = 28;
+      const smallCtx = small.getContext("2d");
+      smallCtx.drawImage(canvas, 0, 0, 28, 28);
+
+      const imageData = smallCtx.getImageData(0, 0, 28, 28).data;
+
+      // imageData is RGBA (4 values per pixel) — extract just one channel
+      const pixels = [];
+      for (let i = 0; i < imageData.length; i += 4) {
+        pixels.push(imageData[i]);  // red channel, since it's grayscale-ish
+      }
+
+      const response = await fetch("/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pixels }),
+      });
+
+      const data = await response.json();
+      document.getElementById("result").innerText =
+        response.ok ? `Predicted: ${data.predicted_digit}` : `Error: ${JSON.stringify(data)}`;
+    });
+  </script>
+</body>
+</html>

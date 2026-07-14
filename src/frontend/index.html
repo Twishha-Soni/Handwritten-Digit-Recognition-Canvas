@@ -1,422 +1,70 @@
+<!-- src/frontend/index.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Digit Recognition</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #10141b;
-    --panel: #1a212c;
-    --panel-border: #2a3340;
-    --paper: #f7f3e8;
-    --paper-line: #dcd5c2;
-    --ink: #e9e6dd;
-    --ink-dim: #8f97a3;
-    --amber: #d4a85a;
-    --amber-dim: #a9884a;
-    --steel: #4c6b8a;
-    --error: #c0654f;
-    --radius: 10px;
-  }
-
-  * { box-sizing: border-box; }
-
-  body {
-    margin: 0;
-    min-height: 100vh;
-    background:
-      radial-gradient(ellipse at top left, #161d27 0%, var(--bg) 55%);
-    color: var(--ink);
-    font-family: 'IBM Plex Mono', monospace;
-    display: flex;
-    justify-content: center;
-    padding: 48px 20px 64px;
-  }
-
-  .page {
-    width: 100%;
-    max-width: 880px;
-  }
-
-  header {
-    margin-bottom: 40px;
-  }
-
-  .eyebrow {
-    font-size: 12px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--steel);
-    margin-bottom: 10px;
-  }
-
-  h1 {
-    font-family: 'Fraunces', serif;
-    font-weight: 500;
-    font-style: italic;
-    font-size: clamp(28px, 5vw, 40px);
-    margin: 0 0 8px;
-    color: var(--ink);
-  }
-
-  .subtitle {
-    color: var(--ink-dim);
-    font-size: 13.5px;
-    line-height: 1.6;
-    max-width: 46ch;
-  }
-
-  .layout {
-    display: grid;
-    grid-template-columns: 300px 1fr;
-    gap: 24px;
-    align-items: start;
-  }
-
-  @media (max-width: 680px) {
-    .layout { grid-template-columns: 1fr; }
-  }
-
-  .card {
-    background: var(--panel);
-    border: 1px solid var(--panel-border);
-    border-radius: var(--radius);
-    padding: 20px;
-  }
-
-  .canvas-wrap {
-    background: var(--paper);
-    border-radius: 6px;
-    padding: 10px;
-    background-image:
-      linear-gradient(var(--paper-line) 1px, transparent 1px),
-      linear-gradient(90deg, var(--paper-line) 1px, transparent 1px);
-    background-size: 14px 14px;
-  }
-
-  canvas {
-    display: block;
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    background: var(--paper);
-    border-radius: 3px;
-    cursor: crosshair;
-    touch-action: none;
-  }
-
-  .controls {
-    display: flex;
-    gap: 10px;
-    margin-top: 16px;
-  }
-
-  button {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-    border-radius: 7px;
-    padding: 11px 16px;
-    cursor: pointer;
-    border: 1px solid transparent;
-    transition: transform 0.12s ease, background 0.15s ease;
-    flex: 1;
-  }
-
-  button:active { transform: scale(0.97); }
-
-  button:focus-visible {
-    outline: 2px solid var(--amber);
-    outline-offset: 2px;
-  }
-
-  .btn-primary {
-    background: var(--amber);
-    color: #201a0e;
-  }
-  .btn-primary:hover { background: #ddb56d; }
-
-  .btn-secondary {
-    background: transparent;
-    color: var(--ink-dim);
-    border-color: var(--panel-border);
-  }
-  .btn-secondary:hover { color: var(--ink); border-color: var(--steel); }
-
-  .result-card {
-    min-height: 340px;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .result-header {
-    font-size: 12px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--steel);
-    margin-bottom: 18px;
-  }
-
-  .empty-state {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    color: var(--ink-dim);
-    font-size: 13.5px;
-    line-height: 1.7;
-    padding: 20px 10px;
-  }
-
-  .prediction-row {
-    display: flex;
-    align-items: baseline;
-    gap: 18px;
-    margin-bottom: 28px;
-  }
-
-  .predicted-digit {
-    font-family: 'Fraunces', serif;
-    font-weight: 600;
-    font-size: 84px;
-    line-height: 1;
-    color: var(--amber);
-  }
-
-  .predicted-meta {
-    color: var(--ink-dim);
-    font-size: 12.5px;
-    line-height: 1.6;
-  }
-
-  .predicted-meta strong {
-    color: var(--ink);
-    font-weight: 500;
-  }
-
-  .bars {
-    display: flex;
-    align-items: flex-end;
-    gap: 8px;
-    height: 130px;
-    padding: 0 4px;
-  }
-
-  .bar-col {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: 100%;
-    justify-content: flex-end;
-    gap: 8px;
-  }
-
-  .bar-track {
-    width: 100%;
-    height: 100px;
-    display: flex;
-    align-items: flex-end;
-    background: rgba(255,255,255,0.03);
-    border-radius: 3px;
-    overflow: hidden;
-  }
-
-  .bar-fill {
-    width: 100%;
-    background: var(--steel);
-    border-radius: 3px 3px 0 0;
-    height: 0%;
-    transition: height 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .bar-fill.winner {
-    background: var(--amber);
-  }
-
-  .bar-label {
-    font-size: 11px;
-    color: var(--ink-dim);
-  }
-
-  .bar-col.winner .bar-label {
-    color: var(--amber);
-    font-weight: 600;
-  }
-
-  .error-banner {
-    background: rgba(192, 101, 79, 0.12);
-    border: 1px solid rgba(192, 101, 79, 0.4);
-    color: #e2a294;
-    font-size: 13px;
-    padding: 12px 14px;
-    border-radius: 7px;
-    margin-bottom: 18px;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .bar-fill { transition: none; }
-    button { transition: none; }
-  }
-</style>
+  <title>Digit Recognition</title>
 </head>
 <body>
-<div class="page">
+  <h2>Draw a digit (0-9)</h2>
+  <canvas id="canvas" width="680" height="680" style="border:1px solid black;"></canvas>
+  <br>
+  <button id="predictBtn">Predict</button>
+  <button id="clearBtn">Clear</button>
+  <h3 id="result"></h3>
 
-  <header>
-    <div class="eyebrow">Handwritten digit classifier &middot; MNIST</div>
-    <h1>Draw a digit, 0 through 9</h1>
-    <p class="subtitle">
-      A RandomForest model trained on 70,000 handwritten samples reads your stroke
-      and scores it against all ten possible digits.
-    </p>
-  </header>
-
-  <div class="layout">
-
-    <div class="card">
-      <div class="canvas-wrap">
-        <canvas id="canvas" width="280" height="280"></canvas>
-      </div>
-      <div class="controls">
-        <button class="btn-secondary" id="clearBtn">Clear</button>
-        <button class="btn-primary" id="predictBtn">Predict</button>
-      </div>
-    </div>
-
-    <div class="card result-card">
-      <div class="result-header">Prediction</div>
-      <div id="resultBody" style="flex:1; display:flex; flex-direction:column;">
-        <div class="empty-state" id="emptyState">
-          Draw a digit on the left and press Predict —<br>I'll show you what I see across all ten digits.
-        </div>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<script>
-  const canvas = document.getElementById("canvas");
-  const ctx = canvas.getContext("2d");
-  ctx.fillStyle = "#f7f3e8";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.lineWidth = 19;
-  ctx.lineCap = "round";
-  ctx.strokeStyle = "#20242b";
-
-  let drawing = false;
-
-  function getPos(e) {
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
-  }
-
-  function startDraw(e) {
-    drawing = true;
-    const { x, y } = getPos(e);
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    e.preventDefault();
-  }
-
-  function moveDraw(e) {
-    if (!drawing) return;
-    const { x, y } = getPos(e);
-    ctx.lineTo(x, y);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    e.preventDefault();
-  }
-
-  function endDraw() { drawing = false; }
-
-  canvas.addEventListener("mousedown", startDraw);
-  canvas.addEventListener("mousemove", moveDraw);
-  canvas.addEventListener("mouseup", endDraw);
-  canvas.addEventListener("mouseleave", endDraw);
-  canvas.addEventListener("touchstart", startDraw);
-  canvas.addEventListener("touchmove", moveDraw);
-  canvas.addEventListener("touchend", endDraw);
-
-  document.getElementById("clearBtn").addEventListener("click", () => {
-    ctx.fillStyle = "#f7f3e8";
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "white";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    resetResult();
-  });
+    ctx.lineWidth = 35;
+    ctx.lineCap = "round";
 
-  function resetResult() {
-    document.getElementById("resultBody").innerHTML = `
-      <div class="empty-state" id="emptyState">
-        Draw a digit on the left and press Predict —<br>I'll show you what I see across all ten digits.
-      </div>`;
-  }
+    let drawing = false;
 
-  function renderError(message) {
-    document.getElementById("resultBody").innerHTML = `
-      <div class="error-banner">${message}</div>
-      <div class="empty-state">Try again with a clearer stroke.</div>
-    `;
-  }
+    canvas.addEventListener("mousedown", () => drawing = true);
+    canvas.addEventListener("mouseup", () => drawing = false);
+    canvas.addEventListener("mouseleave", () => drawing = false);
 
-  function renderResult(predictedDigit, probabilities) {
-    const digits = Object.keys(probabilities).sort();
-    const barsHtml = digits.map(d => {
-      const pct = Math.round(probabilities[d] * 100);
-      const isWinner = d === predictedDigit;
-      return `
-        <div class="bar-col ${isWinner ? "winner" : ""}">
-          <div class="bar-track">
-            <div class="bar-fill ${isWinner ? "winner" : ""}" data-pct="${pct}"></div>
-          </div>
-          <div class="bar-label">${d}</div>
-        </div>`;
-    }).join("");
-
-    const confidencePct = Math.round(probabilities[predictedDigit] * 100);
-
-    document.getElementById("resultBody").innerHTML = `
-      <div class="prediction-row">
-        <div class="predicted-digit">${predictedDigit}</div>
-        <div class="predicted-meta">
-          <strong>${confidencePct}%</strong> confidence<br>across ${digits.length} classes
-        </div>
-      </div>
-      <div class="bars" id="barsContainer">${barsHtml}</div>
-    `;
-
-    // animate bars in after paint
-    requestAnimationFrame(() => {
-      document.querySelectorAll(".bar-fill").forEach(el => {
-        el.style.height = el.dataset.pct + "%";
-      });
+    canvas.addEventListener("mousemove", (e) => {
+      if (!drawing) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      ctx.lineTo(x, y);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x, y);
     });
-  }
 
-  document.getElementById("predictBtn").addEventListener("click", async () => {
-    const small = document.createElement("canvas");
-    small.width = 28;
-    small.height = 28;
-    const smallCtx = small.getContext("2d");
-    smallCtx.drawImage(canvas, 0, 0, 28, 28);
+    canvas.addEventListener("mousedown", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      ctx.beginPath();
+      ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+    });
 
-    const imageData = smallCtx.getImageData(0, 0, 28, 28).data;
-    const pixels = [];
-    for (let i = 0; i < imageData.length; i += 4) {
-      pixels.push(imageData[i]);
-    }
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      ctx.fillStyle = "white";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      document.getElementById("result").innerText = "";
+    });
 
-    try {
+    document.getElementById("predictBtn").addEventListener("click", async () => {
+      // downsample 280x280 canvas -> 28x28 using an offscreen canvas
+      const small = document.createElement("canvas");
+      small.width = 28;
+      small.height = 28;
+      const smallCtx = small.getContext("2d");
+      smallCtx.drawImage(canvas, 0, 0, 28, 28);
+
+      const imageData = smallCtx.getImageData(0, 0, 28, 28).data;
+
+      // imageData is RGBA (4 values per pixel) — extract just one channel
+      const pixels = [];
+      for (let i = 0; i < imageData.length; i += 4) {
+        pixels.push(imageData[i]);  // red channel, since it's grayscale-ish
+      }
+
       const response = await fetch("/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -424,16 +72,12 @@
       });
 
       const data = await response.json();
-
-      if (response.ok) {
-        renderResult(data.predicted_digit, data.probabilities);
-      } else {
-        renderError(data.detail || "Something went wrong.");
-      }
-    } catch (err) {
-      renderError("Could not reach the server.");
-    }
-  });
-</script>
+        if (response.ok) {
+        document.getElementById("result").innerText = `Predicted: ${data.predicted_digit}`;
+        } else {
+        document.getElementById("result").innerText = `${data.detail}`;
+        }
+    });
+  </script>
 </body>
 </html>

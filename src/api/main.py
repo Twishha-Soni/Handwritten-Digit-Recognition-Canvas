@@ -92,6 +92,11 @@ def predict(request: DigitRequest):
     classes = pipeline.classes_
     probabilities = {str(cls): float(p) for cls,p in zip(classes, proba)}
 
+    import matplotlib.pyplot as plt
+    plt.imshow(processed_pixels.reshape(28,28), cmap='binary')
+    plt.show()
+
     prediction = pipeline.predict([processed_pixels])
+    print(prediction[0])
     return DigitResponse(predicted_digit=prediction[0], probabilities=probabilities)
 

@@ -1,0 +1,13 @@
+Pixel range 0–255 confirms raw, unnormalized 8-bit grayscale. This is exactly the problem StandardScaler exists to solve — SGDClassifier does gradient-based optimization
+(As generally in mnist data: text -> white, bg -> black)
+
+Pipeline bundles preprocessing + model into one object with one .fit() and one .predict().
+
+the concept of train/serve separation: training is an offline, occasional, expensive process. Serving is an online, frequent, cheap process.
+
+The artifact that connects training and serving is a serialized model file — the trained pipeline gets frozen to disk exactly as-is and the serving code just loads that frozen file.
+
+you're persisting the whole pipeline, not just the classifier. If you only saved the SGDClassifier and not the StandardScaler, you'd lose the exact mean/std that scaler learned from training data — and any future prediction would be scaled wrong.
+
+
+The important design decision here isn't the prediction call itself — it's when the model gets loaded when connecting it with api.

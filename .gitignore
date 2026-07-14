@@ -1,0 +1,4 @@
+/venv
+/_pycache_
+/src/api/__pycache__
+/models

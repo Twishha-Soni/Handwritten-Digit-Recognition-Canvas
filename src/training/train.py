@@ -1,10 +1,11 @@
 # train.py
 import joblib
+from pathlib import Path
 from sklearn.datasets import fetch_openml
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import SGDClassifier
+from sklearn.ensemble import RandomForestClassifier
 
 # --- load data ---
 mnist = fetch_openml('mnist_784', version=1, as_frame=False)
@@ -18,7 +19,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 # --- build pipeline: scaler + classifier as ONE object ---
 pipeline = Pipeline([
     ("scaler", StandardScaler()),
-    ("clf", SGDClassifier(random_state=42)),
+    ("clf", RandomForestClassifier(n_estimators=100, random_state=42)),
 ])
 
 # --- train ---
@@ -29,5 +30,10 @@ accuracy = pipeline.score(X_test, y_test)
 print("Test accuracy:", accuracy)
 
 # --- persist the ENTIRE fitted pipeline to disk ---
-joblib.dump(pipeline, "digit_pipeline.pkl")
-print("Pipeline saved to digit_pipeline.pkl")
+project_root = Path(__file__).resolve().parents[2]  # src/training/train.py -> project root
+models_dir = project_root / "models"
+models_dir.mkdir(exist_ok=True)
+
+output_path = models_dir / "digit_pipeline.pkl"
+joblib.dump(pipeline, output_path)
+print(f"Pipeline saved to {output_path}")

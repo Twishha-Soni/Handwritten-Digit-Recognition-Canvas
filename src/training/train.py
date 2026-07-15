@@ -34,6 +34,6 @@ project_root = Path(__file__).resolve().parents[2]  # src/training/train.py -> p
 models_dir = project_root / "models"
 models_dir.mkdir(exist_ok=True)
 
-output_path = models_dir / "digit_pipeline.pkl"
+output_path = models_dir / "digit_pipeline.joblib"
 joblib.dump(pipeline, output_path)
 print(f"Pipeline saved to {output_path}")

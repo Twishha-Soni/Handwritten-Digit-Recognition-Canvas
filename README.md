@@ -61,13 +61,13 @@ The fix: apply `scipy.ndimage.gaussian_filter` to the canvas image *after* inver
 
 ## Limitations
 
-- **RandomForestClassifier treats the image as an unordered list of 784 independent numbers, not as a 2D image.** Flattening a 28×28 image into a 784-length vector throws away all spatial structure — the model has no built-in notion that pixel #100 is next to pixel #101, or that a row of pixels forms a line stroke.
-- **It cannot learn spatial patterns like edges, curves, or strokes directly.** Each decision tree just picks thresholds on individual pixel positions (e.g. "is pixel #350 > 128?") — it never learns a *reusable* concept like "a curve" or "a vertical stroke" that generalizes across different digits or positions.
-- **A CNN (Convolutional Neural Network) learns fundamentally differently.** It uses convolutional filters that slide across the image and explicitly learn spatial features — edges, corners, curves — and stack these into increasingly complex shapes across layers. This is much closer to how the digit actually "looks" as a 2D image.
-- **This is why RandomForest is more sensitive to shifts, rotations, and stroke-style variation.** A digit drawn slightly off-center, at a different angle, or with different stroke thickness than training data can confuse a RandomForest much more than a CNN, because the RandomForest is comparing raw pixel positions rather than translation-tolerant learned features.
-- **This is also why our centering and blur preprocessing steps matter more here than they would for a CNN.** A CNN's convolutional filters are naturally more tolerant of small position/texture shifts; a pixel-position-based model like RandomForest has no such tolerance built in, so preprocessing has to do more of that work manually.
-- **RandomForest also can't share what it learns from one part of the image with another.** A CNN's filters are reused across the entire image (the same edge-detector filter scans everywhere), so it needs less data to generalize. RandomForest treats pixel #5 and pixel #500 as completely unrelated features, learned independently.
-- **In short:** RandomForest's ~96% accuracy is genuinely good for a non-neural, classic ML approach on flattened pixel data, but a CNN would typically outperform it, and would be considerably more robust to real-world canvas input (different stroke styles, thicknesses, and positions) without needing as much manual preprocessing.
+- Lacks spatial awareness: RandomForest treats the 28×28 image as a flat list of 784 independent pixels, ignoring that neighboring pixels form strokes, edges, or shapes.
+- Cannot learn reusable spatial features: It only makes decisions on individual pixel values and never learns general concepts like “curves” or “vertical lines” that work across positions.
+- Sensitive to variations: More vulnerable to shifts, rotations, stroke thickness, or style changes compared to a CNN, because it relies on exact pixel positions.
+- No weight sharing: Unlike CNNs, which reuse the same filters across the entire image, RandomForest learns each pixel location independently — requiring more data to generalize.
+- Preprocessing is critical: Centering and blurring help significantly here, whereas CNNs are naturally more tolerant to small translations and texture differences.
+
+**Summary:** ~96% accuracy is solid for a classic ML model on raw pixels, but a CNN would be more accurate and robust with far less manual preprocessing.
 
 ## What I Learned
 

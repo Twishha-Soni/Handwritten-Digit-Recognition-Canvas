@@ -80,7 +80,6 @@ def serve_frontend():
     frontend_path = project_root / 'src' / 'frontend' / 'index.html'
     return FileResponse(frontend_path)
 
-import matplotlib.pyplot as plt
 @app.post('/predict', response_model=DigitResponse)
 def predict(request: DigitRequest):
     processed_pixels = preprocess(request.pixels)
@@ -91,10 +90,6 @@ def predict(request: DigitRequest):
     proba = pipeline.predict_proba([processed_pixels])[0]
     classes = pipeline.classes_
     probabilities = {str(cls): float(p) for cls,p in zip(classes, proba)}
-
-    import matplotlib.pyplot as plt
-    plt.imshow(processed_pixels.reshape(28,28), cmap='binary')
-    plt.show()
 
     prediction = pipeline.predict([processed_pixels])
     print(prediction[0])

@@ -1,4 +1,4 @@
-# Digit Recognition Canvas
+# Handwritten Digit Recognition Canvas
 
 This is my first end-to-end machine learning project — applying **multiclass classification** (digits 0–9) on the MNIST dataset, then serving that model behind a FastAPI backend with a hand-drawn HTML canvas frontend.
 
